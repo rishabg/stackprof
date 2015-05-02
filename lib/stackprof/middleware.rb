@@ -11,11 +11,13 @@ module StackProf
       Middleware.interval = options[:interval] || 1000
       Middleware.enabled  = options[:enabled]
       Middleware.path     = options[:path] || 'tmp'
+      Middleware.action_path = options[:action_path] || ""
       at_exit{ Middleware.save } if options[:save_at_exit]
     end
 
     def call(env)
       enabled = Middleware.enabled?(env)
+      enabled &&= env["REQUEST_PATH"].include?(Middleware.action_path)
       StackProf.start(mode: Middleware.mode, interval: Middleware.interval) if enabled
       @app.call(env)
     ensure
